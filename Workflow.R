@@ -252,12 +252,13 @@ TrigramTokenizer <-
 
 ##Plot####
 x<-1:length(frecuencias)
-x
 qplot(x,frecuencias, log="xy", main = "Logarithmic term frequency",xlab = "Word's Statistical Rank", ylab = "Frequency")
 
 x2<-1:length(frecuencias2)
-x2
 qplot(x2,frecuencias2, log="xy", main = "Logarithmic bigram frequency",xlab = "Bigram's Statistical Rank", ylab = "Frequency")
+
+x4<-1:length(frecuencias4)
+qplot(x4,frecuencias4, log="xy", main = "Logarithmic fourgram frequency",xlab = "Fourgram's Statistical Rank", ylab = "Frequency")
 
 
 ##Topical Analysis#####
