@@ -1,0 +1,5 @@
+# Text-Mining
+R Text Mining for the 21st Century School Research Project - Literature Review
+The purpose of running a Text Mining analysis on the literature corpus used for data extraction was both to provide a separate instrumental analysis of the reviewed material for triangulation, and to help the research team in discovering additional information. It must be noted that Text Mining was carried out after review results were obtained.
+The corpus was stored locally as a set of PDF files. 
+The text mining process on the 86-document corpus produced a matrix of 23,546 terms, out of which 21,870 (92.88%) had a frequency under 45; those low-frequency terms had a collective cumulative frequency that accounted for merely 20.17% of the total. Only 7.12% of the retrieved terms accounted for 79.83% of the cumulative distribution, which would correspond to a subset of 1676 relevant words. The former suggests that principal component analysis for reduction of terms is justified; cut-off method was used as implied above, finding Pareto-sufficient cut-off frequencies.
