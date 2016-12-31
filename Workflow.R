@@ -177,12 +177,19 @@ findFreqTerms(dtm, frecorte)
 
 tail(frecuencias,200)
 
-#### Transformación#TF-IDF###########################################################################
+#### 
+#Transformación#TF-IDF###########################################################################
 #
-#En este punto se vuelve a ejecutar el proceso utilizando la función de
-#normalización TF-IDF, con la cual se castiga a los términos más frecuentes en todos los documentos del corpus
-
-dtm_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE)))
+# En este punto se vuelve a ejecutar el proceso utilizando la función de 
+# normalización TF-IDF, con la cual se "castiga" a los términos más frecuentes en
+# todos los documentos del corpus. Hay dos maneras de hacerlo: se puede partir 
+# del corpus preprocesado y crear la matriz usando la función weightTfIdf: 
+# dtm_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE)))
+# De forma alternativa, se puede aplicar la
+# función weightTfIdf a la matriz 'cruda' es decir, la que se procesó antes sin
+# ponderar:
+dtm_idf <- weightTfIdf(dtm, normalize = TRUE)
+# De cualquier modo, es prudente reducir la dispersión de la matriz:
 dtm_idf <- removeSparseTerms(dtm_idf, .8)
 dim(dtm_idf)
 inspect(dtm_idf)
@@ -199,6 +206,8 @@ BigramTokenizer <-
 
 # Cómputo de la matriz Documento-Término para bigramas, dtm2
 dtm2 <- DocumentTermMatrix(tradocs, control = list(tokenize = BigramTokenizer))
+# para calcular posteriormente la matriz ponderada con TF-IDF guardamos una copia temporal antes de procesarla
+dtm2_raw <- dtm2
 
 dim(dtm2)
 inspect(dtm2)
@@ -221,8 +230,11 @@ write.table(frecuencias2, "./relevant2.csv", sep = "\t")
 
 ## Bigramas TF-IDF ####
 #
+# dtm2_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = BigramTokenizer))
 # Se repite el análisis de bigramas para la DTM ponderada con TF-IDF:
-dtm2_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = BigramTokenizer))
+dtm2_idf <- weightTfIdf(dtm2_raw, normalize = TRUE)
+# No necesitamos mantener la matriz cruda en memoria:
+rm(dtm2_raw)
 dtm2_idf <-removeSparseTerms(dtm2_idf,.9)
 inspect(dtm2_idf)
 frecuencias2_idf <- sort(colSums(as.matrix(dtm2_idf)), decreasing = T)
@@ -243,8 +255,11 @@ TrigramTokenizer <-
     unlist(lapply(ngrams(words(x), 3), paste, collapse = " "), use.names = TRUE)
   }
     
-# Cómputo de la matriz Término-Documento, transpuesta de la dtm
+# Cómputo de la matriz DTM para trigramas sin ponderación
  dtm3 <- DocumentTermMatrix(tradocs, control = list(tokenize = TrigramTokenizer))
+# para calcular posteriormente la matriz ponderada con TF-IDF guardamos una copia temporal antes de procesarla
+ dtm3_raw <- dtm3
+ 
  dtm3 <-removeSparseTerms(dtm3,.95)
  dim(dtm3)
  inspect(dtm3)
@@ -255,7 +270,10 @@ TrigramTokenizer <-
  ## Trigramas TF-IDF ####
  #
  # Se repite el análisis de trigramas para la DTM ponderada con TF-IDF:
- dtm3_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = TrigramTokenizer))
+ # dtm3_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = TrigramTokenizer))
+ dtm3_idf <- weightTfIdf(dtm3_raw, normalize = TRUE)
+ rm(dtm3_raw)
+ 
  dtm3_idf <-removeSparseTerms(dtm3_idf,.9)
  inspect(dtm3_idf)
  frecuencias3_idf <- sort(colSums(as.matrix(dtm3_idf)), decreasing = T)
@@ -271,6 +289,8 @@ TrigramTokenizer <-
  
  # Cómputo de la matriz Término-Documento, transpuesta de la dtm
  dtm4 <- DocumentTermMatrix(tradocs, control = list(tokenize = FourgramTokenizer))
+ dtm4_raw <- dtm4
+ 
  dtm4 <-removeSparseTerms(dtm4,.95)
  dim(dtm4)
  inspect(dtm4)
@@ -281,7 +301,10 @@ TrigramTokenizer <-
  ## Tetragramas TF-IDF ####
  #
  # Se repite el análisis de tetragramas para la DTM ponderada con TF-IDF:
- dtm4_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = FourgramTokenizer))
+ # dtm4_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = FourgramTokenizer))
+ dtm4_idf <- weightTfIdf(dtm4_raw, normalize = TRUE)
+ rm(dtm4_raw)
+ 
  dtm4_idf <-removeSparseTerms(dtm4_idf,.9)
  inspect(dtm4_idf)
  frecuencias4_idf <- sort(colSums(as.matrix(dtm4_idf)), decreasing = T)
