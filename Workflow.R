@@ -228,6 +228,12 @@ inspect(dtm2_idf)
 frecuencias2_idf <- sort(colSums(as.matrix(dtm2_idf)), decreasing = T)
 write.table(frecuencias2_idf, "./bigramas_idf.csv", sep = "\t")
 
+# Casos especiales ####
+# Se revisa la aparición de los dos unigramas más frecuentes en los bigramas
+findAssocs(dtm2_idf, names(frecuencias2_idf[1]), .7)
+findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .7)
+findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
+
 
 ## Trigramas ######
 # Tokenización por trigramas usando la capacidad del paquete {NLP}
