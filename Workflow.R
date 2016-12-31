@@ -23,11 +23,19 @@ writeLines(as.character(articulos[13]))
 # transformación de los textos para obtener un material cuantificable. El paquete {tm}
 # incluye varias transformaciones:
 getTransformations()
-#La primera transformación relevante consiste en quitar la puntuación. Dado que
-#las transformaciones alteran el contenido, resulta prudente mantener un
-#seguimiento del proceso. Para ello se cambia el nombre del objeto sobre el cual
-#se trabaja a 'limpieza', el cual se genera a partir de 'artículos':
-limpieza <- tm_map(articulos, removePunctuation)
+#Dado que las transformaciones alteran el contenido, resulta prudente mantener 
+#un seguimiento del proceso. Para ello se cambia el nombre del objeto sobre el 
+#cual se trabaja a 'limpieza', el cual se genera a partir de 'artículos'. Al
+#generar cada transformación subsiguiente se sobreescribe la variable 'limpieza'
+#con una nueva versión. Las transformaciones siguientes incluyen pasar todos los
+#términos a minúsculas —tolower— y eliminar las palabras sin significación
+#relevante, como conjunciones, artículos, etc. utilizando la función removeWords
+#con el parámetro 'stopwords' y el idioma de los textos:
+limpieza <- tm_map(articulos, content_transformer(tolower))
+limpieza <- tm_map(limpieza, removeWords, stopwords("english"))
+limpieza <- tm_map(limpieza, removeWords, stopwords("spanish"))
+#La siguiente transformación relevante consiste en quitar la puntuación:
+limpieza <- tm_map(limpieza, removePunctuation)
 #Algunos signos de puntuación asociados a caractéres especiales y que no están 
 #separados de las palabras deben ser eliminados directamente, utilizando una 
 #función que los reemplace por espacios en blanco. La función genérica que se 
@@ -39,15 +47,6 @@ limpieza <- tm_map(limpieza, toSpace, "<")
 limpieza <- tm_map(limpieza, toSpace, ">")
 limpieza <- tm_map(limpieza, toSpace, "\\")
 
-# Al generar cada transformación subsiguiente se sobreescribe la variable
-# 'limpieza' con una nueva versión. Las transformaciones
-# siguientes incluyen pasar todos los términos a minúsculas —tolower— y eliminar
-# las palabras sin significación relevante, como conjunciones, artículos, etc.
-# utilizando la función removeWords con el parámetro 'stopwords' y el idioma de
-# los textos:
-limpieza <- tm_map(limpieza, content_transformer(tolower))
-limpieza <- tm_map(limpieza, removeWords, stopwords("english"))
-limpieza <- tm_map(limpieza, removeWords, stopwords("spanish"))
 # Se verifica el resultado del proceso, comparando un elemento inicial:
 writeLines(as.character(articulos[43]))
 # El cual se diferencia del resultado de depuración:
@@ -128,11 +127,17 @@ summary(frecuencias)
 tabla.frecuencias <- table(frecuencias)
 tabla.frecuencias
 
-#### Resultado 1 - Punto B###########################################################################
+#### Transformación#TF-IDF###########################################################################
 #
-#En este punto se revisan los resultados para encontrar stopwords en 'relevant'.
-#Se crea la variable 'myStopwords' manualmente en el **Punto A** y se vuelve a
-#ejecutar el proceso. 
+#En este punto se vuelve a ejecutar el proceso utilizando la función de
+#normalización TF-IDF, con la cual se castiga a los términos más frecuentes en todos los documentos del corpus
+
+dtm_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE)))
+dtm_idf <- removeSparseTerms(dtm_idf, .8)
+dim(dtm_idf)
+inspect(dtm_idf)
+frecuencias_idf <- sort(colSums(as.matrix(dtm_idf)), decreasing = T)
+frecuencias_idf
 
 ####Pareto#Frecuencias#acumuladas#####################################################
 # Creamos la función pareto que permite calcular la frecuencia acumulada a
