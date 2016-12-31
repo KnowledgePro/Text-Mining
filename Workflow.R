@@ -23,11 +23,19 @@ writeLines(as.character(articulos[13]))
 # transformación de los textos para obtener un material cuantificable. El paquete {tm}
 # incluye varias transformaciones:
 getTransformations()
-#La primera transformación relevante consiste en quitar la puntuación. Dado que
-#las transformaciones alteran el contenido, resulta prudente mantener un
-#seguimiento del proceso. Para ello se cambia el nombre del objeto sobre el cual
-#se trabaja a 'limpieza', el cual se genera a partir de 'artículos':
-limpieza <- tm_map(articulos, removePunctuation)
+#Dado que las transformaciones alteran el contenido, resulta prudente mantener 
+#un seguimiento del proceso. Para ello se cambia el nombre del objeto sobre el 
+#cual se trabaja a 'limpieza', el cual se genera a partir de 'artículos'. Al
+#generar cada transformación subsiguiente se sobreescribe la variable 'limpieza'
+#con una nueva versión. Las transformaciones siguientes incluyen pasar todos los
+#términos a minúsculas —tolower— y eliminar las palabras sin significación
+#relevante, como conjunciones, artículos, etc. utilizando la función removeWords
+#con el parámetro 'stopwords' y el idioma de los textos:
+limpieza <- tm_map(articulos, content_transformer(tolower))
+limpieza <- tm_map(limpieza, removeWords, stopwords("english"))
+limpieza <- tm_map(limpieza, removeWords, stopwords("spanish"))
+#La siguiente transformación relevante consiste en quitar la puntuación:
+limpieza <- tm_map(limpieza, removePunctuation)
 #Algunos signos de puntuación asociados a caractéres especiales y que no están 
 #separados de las palabras deben ser eliminados directamente, utilizando una 
 #función que los reemplace por espacios en blanco. La función genérica que se 
@@ -39,15 +47,6 @@ limpieza <- tm_map(limpieza, toSpace, "<")
 limpieza <- tm_map(limpieza, toSpace, ">")
 limpieza <- tm_map(limpieza, toSpace, "\\")
 
-# Al generar cada transformación subsiguiente se sobreescribe la variable
-# 'limpieza' con una nueva versión. Las transformaciones
-# siguientes incluyen pasar todos los términos a minúsculas —tolower— y eliminar
-# las palabras sin significación relevante, como conjunciones, artículos, etc.
-# utilizando la función removeWords con el parámetro 'stopwords' y el idioma de
-# los textos:
-limpieza <- tm_map(limpieza, content_transformer(tolower))
-limpieza <- tm_map(limpieza, removeWords, stopwords("english"))
-limpieza <- tm_map(limpieza, removeWords, stopwords("spanish"))
 # Se verifica el resultado del proceso, comparando un elemento inicial:
 writeLines(as.character(articulos[43]))
 # El cual se diferencia del resultado de depuración:
@@ -128,12 +127,6 @@ summary(frecuencias)
 tabla.frecuencias <- table(frecuencias)
 tabla.frecuencias
 
-#### Resultado 1 - Punto B###########################################################################
-#
-#En este punto se revisan los resultados para encontrar stopwords en 'relevant'.
-#Se crea la variable 'myStopwords' manualmente en el **Punto A** y se vuelve a
-#ejecutar el proceso. 
-
 ####Pareto#Frecuencias#acumuladas#####################################################
 # Creamos la función pareto que permite calcular la frecuencia acumulada a
 # partir de una frecuencia en particular:
@@ -184,6 +177,18 @@ findFreqTerms(dtm, frecorte)
 
 tail(frecuencias,200)
 
+#### Transformación#TF-IDF###########################################################################
+#
+#En este punto se vuelve a ejecutar el proceso utilizando la función de
+#normalización TF-IDF, con la cual se castiga a los términos más frecuentes en todos los documentos del corpus
+
+dtm_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE)))
+dtm_idf <- removeSparseTerms(dtm_idf, .8)
+dim(dtm_idf)
+inspect(dtm_idf)
+frecuencias_idf <- sort(colSums(as.matrix(dtm_idf)), decreasing = T)
+write.table(frecuencias_idf, "./unigram_idf.csv", sep="\t")
+
 ##Bigramas#########
 # Se hace la tokenización por bigramas usando la capacidad del paquete {NLP}
 BigramTokenizer <-
@@ -214,6 +219,15 @@ useful2<- length(frecuencias2) - length(subset(frecuencias2, frecuencias2<frecor
 frecuencias2 <- head(frecuencias2,useful2)
 write.table(frecuencias2, "./relevant2.csv", sep = "\t")
 
+## Bigramas TF-IDF ####
+#
+# Se repite el análisis de bigramas para la DTM ponderada con TF-IDF:
+dtm2_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = BigramTokenizer))
+dtm2_idf <-removeSparseTerms(dtm2_idf,.9)
+inspect(dtm2_idf)
+frecuencias2_idf <- sort(colSums(as.matrix(dtm2_idf)), decreasing = T)
+write.table(frecuencias2_idf, "./bigramas_idf.csv", sep = "\t")
+
 
 ## Trigramas ######
 # Tokenización por trigramas usando la capacidad del paquete {NLP}
@@ -232,6 +246,15 @@ TrigramTokenizer <-
  frecuencias3
  write.table(frecuencias3, "./relevant3.csv", sep = "\t")
  
+ ## Trigramas TF-IDF ####
+ #
+ # Se repite el análisis de trigramas para la DTM ponderada con TF-IDF:
+ dtm3_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = TrigramTokenizer))
+ dtm3_idf <-removeSparseTerms(dtm3_idf,.9)
+ inspect(dtm3_idf)
+ frecuencias3_idf <- sort(colSums(as.matrix(dtm3_idf)), decreasing = T)
+ write.table(frecuencias3_idf, "./trigramas_idf.csv", sep = "\t")
+ 
  ## Cuatrigramas ######
  # Tokenización por cuatrigramas usando la capacidad del paquete {NLP}
  FourgramTokenizer <-
@@ -249,6 +272,14 @@ TrigramTokenizer <-
  frecuencias4
  write.table(frecuencias4, "./relevant4.csv", sep = "\t")
  
+ ## Tetragramas TF-IDF ####
+ #
+ # Se repite el análisis de tetragramas para la DTM ponderada con TF-IDF:
+ dtm4_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE), tokenize = FourgramTokenizer))
+ dtm4_idf <-removeSparseTerms(dtm4_idf,.9)
+ inspect(dtm4_idf)
+ frecuencias4_idf <- sort(colSums(as.matrix(dtm4_idf)), decreasing = T)
+ write.table(frecuencias4_idf, "./tetragramas_idf.csv", sep = "\t")
 
 ##Plot####
 x<-1:length(frecuencias)
@@ -259,6 +290,13 @@ qplot(x2,frecuencias2, log="xy", main = "Logarithmic bigram frequency",xlab = "B
 
 x4<-1:length(frecuencias4)
 qplot(x4,frecuencias4, log="xy", main = "Logarithmic fourgram frequency",xlab = "Fourgram's Statistical Rank", ylab = "Frequency")
+
+## Plot TF-IDF ####
+x_idf<-1:length(frecuencias_idf)
+qplot(x_idf,frecuencias_idf, log="xy", main = "Logarithmic term frequency",xlab = "Word's Statistical Rank", ylab = "Normalized Frequency")
+qplot(x_idf,frecuencias_idf, main = "Term frequency",xlab = "Word's Statistical Rank", ylab = "Frequency")
+
+
 
 
 ##Topical Analysis#####

@@ -11,3 +11,8 @@ relevant4.csv
 rerelevant.csv
 solving pdf.ocrf
 unigram.csv
+README.html
+unigram_idf.csv
+bigramas_idf.csv
+trigramas_idf.csv
+tetragramas_idf.csv
