@@ -296,8 +296,10 @@ x_idf<-1:length(frecuencias_idf)
 qplot(x_idf,frecuencias_idf, log="xy", main = "Logarithmic term frequency",xlab = "Word's Statistical Rank", ylab = "Normalized Frequency")
 qplot(x_idf,frecuencias_idf, main = "Term frequency",xlab = "Word's Statistical Rank", ylab = "Frequency")
 
-
-
+# WordCloud ####
+require(wordcloud)
+wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, ordered.colors = TRUE)
+wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2") )
 
 ##Topical Analysis#####
 ## Antes de instalar el paquete {topicmodels} es importante instalar en el 
