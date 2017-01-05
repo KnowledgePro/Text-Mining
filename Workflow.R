@@ -328,7 +328,12 @@ qplot(x_idf,frecuencias_idf, main = "Term frequency",xlab = "Word's Statistical 
 # WordCloud ####
 require(wordcloud)
 wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, ordered.colors = TRUE)
-wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2") )
+wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2"))
+
+## Resultados Asociación ####
+
+game<-findAssocs(dtm_idf,"gam",.4)
+game
 
 ##Topical Analysis#####
 ## Antes de instalar el paquete {topicmodels} es importante instalar en el 
