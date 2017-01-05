@@ -240,13 +240,6 @@ inspect(dtm2_idf)
 frecuencias2_idf <- sort(colSums(as.matrix(dtm2_idf)), decreasing = T)
 write.table(frecuencias2_idf, "./bigramas_idf.csv", sep = "\t")
 
-# Casos especiales ####
-# Se revisa la aparición de los dos unigramas más frecuentes en los bigramas
-findAssocs(dtm2_idf, names(frecuencias2_idf[1]), .7)
-findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .7)
-findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
-
-
 ## Trigramas ######
 # Tokenización por trigramas usando la capacidad del paquete {NLP}
 TrigramTokenizer <-
@@ -330,10 +323,19 @@ require(wordcloud)
 wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, ordered.colors = TRUE)
 wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2"))
 
+
 ## Resultados Asociación ####
 
 game<-findAssocs(dtm_idf,"gam",.4)
 game
+write.table(game, "./gameassocs.csv", sep = "\t")
+
+
+# Se revisa la asociación de los bigramas más frecuentes con otros bigramas
+findAssocs(dtm2_idf, names(frecuencias2_idf[1]), .7)
+findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .7)
+findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
+
 
 ## Pierson's Correlations ####
 
@@ -342,9 +344,9 @@ cor_2[names(head(frecuencias_idf, 20)), c("skill", "technolog", "stem", "pedagog
 cor_2[names(head(frecuencias_idf, 20)), names(head(frecuencias_idf, 20))]
 
 ##Topical Analysis#####
-## Antes de instalar el paquete {topicmodels} es importante instalar en el 
-## sistema la librería GNU Scientific Library (GSL) -- development package. Sin
-## eso, no corre la instalación.
+## Antes de instalar el paquete {topicmodels} es importante
+## instalar en el sistema operativo la librería GNU Scientific Library (GSL) --
+## development package. Sin eso, no corre la instalación.
 library(topicmodels)
 
 ## LDA parameters ###########################################
