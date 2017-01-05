@@ -335,6 +335,12 @@ wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brew
 game<-findAssocs(dtm_idf,"gam",.4)
 game
 
+## Pierson's Correlations ####
+
+cor_2 <- cor(as.matrix(dtm_idf))
+cor_2[names(head(frecuencias_idf, 20)), c("skill", "technolog", "stem", "pedagog", "manag")]
+cor_2[names(head(frecuencias_idf, 20)), names(head(frecuencias_idf, 20))]
+
 ##Topical Analysis#####
 ## Antes de instalar el paquete {topicmodels} es importante instalar en el 
 ## sistema la librería GNU Scientific Library (GSL) -- development package. Sin
