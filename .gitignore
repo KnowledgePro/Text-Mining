@@ -16,3 +16,7 @@ unigram_idf.csv
 bigramas_idf.csv
 trigramas_idf.csv
 tetragramas_idf.csv
+WordCloud_TfIdf.png
+.RData2.RData
+.RDataTmp
+Last-operational.RData
