@@ -1,4 +1,4 @@
-##El proceso se inicia al cargar los paquetes requeridos {tm} y {SnowballC} 
+##El proceso se inicia al cargar los paquetes requeridos {tm}, {SnowballC} y {ggplot} 
 library(tm, SnowballC)
 library(ggplot2)
 # La fase de preprocesamiento para Análisis Textual en R requiere una revision 
@@ -76,24 +76,7 @@ writeLines(as.character(articulos[13]))
 limpieza <- tm_map(limpieza, stemDocument, language = "english")
 limpieza <- tm_map(limpieza, stemDocument, language = "spanish")
 
-## Stopwords Punto A ##############################################################################
-#
-# A este punto se debe regresar en un proceso iterativo luego de 
-#encontrar los términos más frecuentes, pues eliminar las palabras accidentales 
-#o sin significación determinante no conviene antes de saber cuáles son. Se rea 
-#una variable 'myStopwords' manualmente para eliminar los términos residuales 
-#que salen en el **Punto B** de la ejecución. En la investigación en curso, se 
-#tomó la decisión de no aliminar ningún término para maximizar las combinaciones
-#de términos en la tokenización 2- y 3-gram 
-#
-#   
-## myStopwords <- c("can", "use", "one", "also", "vol", "way", "will", "que",
-#"mani", "may", "two", "well", "see", "first", "los", "within", "take", "high",
-#"para", "part", "view", "ask", "howev", "las", "get", "other", "three", 
-#"often", "might", "toward", "want", "young", "del", "even", "just", "among",
-#"como", "york", "general", "number", "anoth", "futur", "day", "good", "", "",
-#"", "", "", "", "", "", "", "", "", "", "", "", "", )
-# limpie <- tm_map(docs, removeWords, myStopwords)
+
 
 #Un último paso de la fase de preprocesamiento consiste en transformar el 
 #listado de respuestas en documentos de texto plano:
@@ -329,6 +312,10 @@ wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brew
 game<-findAssocs(dtm_idf,"gam",.4)
 game
 write.table(game, "./gameassocs.csv", sep = "\t")
+
+librari<-findAssocs(dtm_idf,"librari",.4)
+librari
+write.table(librari, "./librariassocs.csv", sep = "\t")
 
 
 # Se revisa la asociación de los bigramas más frecuentes con otros bigramas
