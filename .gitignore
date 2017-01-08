@@ -21,3 +21,5 @@ WordCloud_TfIdf.png
 .RDataTmp
 Last-operational.RData
 gameassocs.csv
+librariassocs.csv
+wordcloud-ordered.png

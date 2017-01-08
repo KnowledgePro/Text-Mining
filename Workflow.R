@@ -304,7 +304,8 @@ qplot(x_idf,frecuencias_idf, main = "Term frequency",xlab = "Word's Statistical 
 # WordCloud ####
 require(wordcloud)
 wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, ordered.colors = TRUE)
-wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2"))
+wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = F)
+# wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Set2"), random.order = F)
 
 
 ## Resultados Asociación ####
