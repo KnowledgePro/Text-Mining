@@ -40,6 +40,7 @@ limpieza <- tm_map(limpieza, removePunctuation)
 #separados de las palabras deben ser eliminados directamente, utilizando una 
 #función que los reemplace por espacios en blanco. La función genérica que se 
 #emplea es la siguiente:
+## function toSpace ####
 toSpace <- content_transformer(function(x, pattern) {return (gsub(pattern, " ", x, fixed = TRUE))})
 # La función se emplea para reemplazar los caracteres indeseados dentro del corpus: 
 limpieza <- tm_map(limpieza, toSpace, "\f")
@@ -81,9 +82,10 @@ limpieza <- tm_map(limpieza, stemDocument, language = "spanish")
 #Un último paso de la fase de preprocesamiento consiste en transformar el 
 #listado de respuestas en documentos de texto plano:
 tradocs <- tm_map(limpieza, PlainTextDocument)
-#Se eliminan tanto el Corpus temporal de limpieza como el de lectura de los
-#artículos:
-rm(limpieza,articulos,material)
+#Se eliminan tanto el Corpus temporal de limpieza como el índice del directorio.
+#Conservamos el corpus inicial de lectura para cotejar la radicación contra los
+#términos originales:
+rm(limpieza, material)
 # Para verificar el efecto de transformación
 writeLines(as.character(tradocs[13]))
 ## Luego de esto se pasa a la fase de montaje de los datos. El resultado será
@@ -164,7 +166,7 @@ tail(frecuencias,200)
 #Transformación#TF-IDF###########################################################################
 #
 # En este punto se vuelve a ejecutar el proceso utilizando la función de 
-# normalización TF-IDF, con la cual se "castiga" a los términos más frecuentes en
+# normalización TF-IDF, con la cual se modula el rango estadístico de los términos más frecuentes en
 # todos los documentos del corpus. Hay dos maneras de hacerlo: se puede partir 
 # del corpus preprocesado y crear la matriz usando la función weightTfIdf: 
 # dtm_idf <- DocumentTermMatrix(tradocs, control = list(weighting = function(x) weightTfIdf(x, normalize = TRUE)))
@@ -310,18 +312,39 @@ wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brew
 
 ## Resultados Asociación ####
 
-game<-findAssocs(dtm_idf,"gam",.4)
+game <- findAssocs(dtm_idf,"gam",.4)
 game
 write.table(game, "./gameassocs.csv", sep = "\t")
 
-librari<-findAssocs(dtm_idf,"librari",.4)
+librari <- findAssocs(dtm_idf,"librari",.4)
 librari
 write.table(librari, "./librariassocs.csv", sep = "\t")
 
+# Los resultados de 'gam' incluyen 'squ' que puede ser 'squander'. Se crea una dtm temporal a partir de 'articulos' para verificar si aparece:
+require(slam)
+articulos <- tm_map(articulos, removeWords, stopwords("english"))
+dtm_articulos <- DocumentTermMatrix(articulos, control = list(removePunctuation = TRUE, removeNumbers = TRUE, tolower = TRUE, stripWhitespace = TRUE))
+squ_score <- tm_term_score(dtm_articulos, "squander", col_sums)
+squ_score
+# Corriendo las dos líneas de código anteriores con los diferentes términos
+# derivados de 'squander' se hace evidente que ninguna de estas palabras está
+# presente en el corpus. Se procede a eliminar el Corpus:
+rm(articulos)
+# buscamos las asociaciones de 'squ':
+squ <- findAssocs(dtm_idf,"squ",.4)
+squ
+
 
 # Se revisa la asociación de los bigramas más frecuentes con otros bigramas
-findAssocs(dtm2_idf, names(frecuencias2_idf[1]), .7)
-findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .7)
+# Primer bigrama:
+fist_bigram_assoc <- findAssocs(dtm2_idf, names(frecuencias2_idf[1]), .4)
+fist_bigram_assoc
+write.table(fist_bigram_assoc, "./fist_bigram_assoc.csv", sep = "\t")
+# Segundo bigrama:
+second_bigram_assoc <- findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .4)
+second_bigram_assoc
+write.table(second_bigram_assoc, "./second_bigram_assoc.csv", sep = "\t")
+
 findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
 
 

@@ -23,3 +23,5 @@ Last-operational.RData
 gameassocs.csv
 librariassocs.csv
 wordcloud-ordered.png
+fist_bigram_assoc.csv
+second_bigram_assoc.csv
