@@ -320,7 +320,8 @@ librari <- findAssocs(dtm_idf,"librari",.4)
 librari
 write.table(librari, "./librariassocs.csv", sep = "\t")
 
-# Los resultados de 'gam' incluyen 'squ' que puede ser 'squander'. Se crea una dtm temporal a partir de 'articulos' para verificar si aparece:
+# Los resultados de 'gam' incluyen 'squ' que puede ser 'squander'. Se crea una
+# dtm temporal a partir de 'articulos' para verificar si aparece:
 require(slam)
 articulos <- tm_map(articulos, removeWords, stopwords("english"))
 dtm_articulos <- DocumentTermMatrix(articulos, control = list(removePunctuation = TRUE, removeNumbers = TRUE, tolower = TRUE, stripWhitespace = TRUE))
@@ -328,8 +329,8 @@ squ_score <- tm_term_score(dtm_articulos, "squander", col_sums)
 squ_score
 # Corriendo las dos líneas de código anteriores con los diferentes términos
 # derivados de 'squander' se hace evidente que ninguna de estas palabras está
-# presente en el corpus. Se procede a eliminar el Corpus:
-rm(articulos)
+# presente en el corpus. Se procede a eliminar el Corpus y la matriz Documento-Término sin ponderar:
+rm(articulos, dtm_articulos)
 # buscamos las asociaciones de 'squ':
 squ <- findAssocs(dtm_idf,"squ",.4)
 squ
@@ -348,11 +349,37 @@ write.table(second_bigram_assoc, "./second_bigram_assoc.csv", sep = "\t")
 findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
 
 
-## Pierson's Correlations ####
+## Pierson's Correlations #### 
+# Se obtienen las correlaciones de Pearson para
+# todos los términos de la matriz ponderada con IDF
+cor_2 <- as.matrix(dtm_idf)
+# A partir de la matriz de correlaciones Se establece una matriz booleana: toda
+# correlación positiva es 1 y toda correlación negativa es cero.
+boolean <- cor_2
+boolean[boolean>0] <- 1
+boolean[boolean<=0] <- 0
+#Verificamos el resultado
+boolean[1:15,1:15]
 
-cor_2 <- cor(as.matrix(dtm_idf))
-cor_2[names(head(frecuencias_idf, 20)), c("skill", "technolog", "stem", "pedagog", "manag")]
-cor_2[names(head(frecuencias_idf, 20)), names(head(frecuencias_idf, 20))]
+# Generamos un grafo de correlaciones entre los elementos de mayor rango estadístico usando {igraph}
+
+library("igraph", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.3")
+numNodes <- 30
+distance <- graph.adjacency(boolean[names(head(frecuencias_idf, numNodes)),names(head(frecuencias_idf, numNodes))], weighted=TRUE, mode="undirected")
+distance <- simplify(distance)
+V(distance)$label <- V(distance)$name
+V(distance)$degree <- degree(distance)
+set.seed(100)
+layout1 <- layout.fruchterman.reingold(distance)
+layout2 <- layout.kamada.kawai(distance)
+# Se da peso a cada nodo de acuerdo con sus conexiones:
+V(distance)$label.cex <- .7 * V(distance)$degree / max(V(distance)$degree)+ .5
+egam <- (log(E(distance)$weight)+.4)/ max(E(distance)$weight)+.4
+E(g)$color <- rgb(.5,.5, 0, egam)
+E(distance)$width <- egam
+plot(distance, layout=layout1, vertex.label.color="darkred")
+
+
 
 ##Topical Analysis#####
 ## Antes de instalar el paquete {topicmodels} es importante
