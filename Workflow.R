@@ -311,6 +311,7 @@ wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brew
 
 
 ## Resultados Asociación ####
+# Para los casos especiales, se revisan las asociaciones:
 
 game <- findAssocs(dtm_idf,"gam",.4)
 game
@@ -345,16 +346,19 @@ write.table(fist_bigram_assoc, "./fist_bigram_assoc.csv", sep = "\t")
 second_bigram_assoc <- findAssocs(dtm2_idf, names(frecuencias2_idf[2]), .4)
 second_bigram_assoc
 write.table(second_bigram_assoc, "./second_bigram_assoc.csv", sep = "\t")
-
-findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .7)
-
+# Tercer bigrama
+third_bigram_assoc <- findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .4)
+third_bigram_assoc
+write.table(third_bigram_assoc, "./third_bigram_assoc.csv", sep = "\t")
 
 ## Pierson's Correlations #### 
 # Se obtienen las correlaciones de Pearson para
 # todos los términos de la matriz ponderada con IDF
-cor_2 <- as.matrix(dtm_idf)
-# A partir de la matriz de correlaciones Se establece una matriz booleana: toda
-# correlación positiva es 1 y toda correlación negativa es cero.
+cor_2 <- cor(as.matrix(dtm_idf))
+# A partir de la matriz de correlaciones Se establece una matriz booleana: toda 
+# correlación positiva es 1 y toda correlación negativa es cero. No es necesario
+# generar la matriz producto boolean %*% t(boolean) ya que la función de
+# correlación de Pearson lo hace
 boolean <- cor_2
 boolean[boolean>0] <- 1
 boolean[boolean<=0] <- 0
@@ -365,10 +369,12 @@ boolean[1:15,1:15]
 
 library("igraph", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.3")
 numNodes <- 30
+
 distance <- graph.adjacency(boolean[names(head(frecuencias_idf, numNodes)),names(head(frecuencias_idf, numNodes))], weighted=TRUE, mode="undirected")
 distance <- simplify(distance)
 V(distance)$label <- V(distance)$name
 V(distance)$degree <- degree(distance)
+# La distribución espacial se basa en algoritmos dirigidos por fuerzas internas
 set.seed(100)
 layout1 <- layout.fruchterman.reingold(distance)
 layout2 <- layout.kamada.kawai(distance)
@@ -378,6 +384,22 @@ egam <- (log(E(distance)$weight)+.4)/ max(E(distance)$weight)+.4
 E(g)$color <- rgb(.5,.5, 0, egam)
 E(distance)$width <- egam
 plot(distance, layout=layout1, vertex.label.color="darkred")
+
+## Dendrogram clustering ####
+m2 <- head(frecuencias2_idf, 2*numNodes)
+m3 <- t(removeSparseTerms(dtm2_idf, sparse = .79))
+
+# cluster terms for m2 - ordered top bigrams from frecuencias2_idf
+distMatrix <- dist(scale(m2))
+fit <- hclust(distMatrix, method = "ward.D")
+plot(fit)
+rect.hclust(fit, k = 8)
+
+# cluster terms for m3 - bigrams from dtm2_idf -reduced sparsity 
+distMatrix3 <- dist(scale(m3))
+fit3 <- hclust(distMatrix3, method = "ward.D")
+plot(fit3)
+rect.hclust(fit3, k = 8)
 
 
 
