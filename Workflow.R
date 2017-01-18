@@ -310,7 +310,7 @@ wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brew
 # wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Set2"), random.order = F)
 
 
-## Resultados Asociación ####
+## Resultados de Asociación ####
 # Para los casos especiales, se revisan las asociaciones:
 
 game <- findAssocs(dtm_idf,"gam",.4)
@@ -351,6 +351,16 @@ third_bigram_assoc <- findAssocs(dtm2_idf, names(frecuencias2_idf[3]), .4)
 third_bigram_assoc
 write.table(third_bigram_assoc, "./third_bigram_assoc.csv", sep = "\t")
 
+# Notablemente, Hong Kong y New York son dos bigramas de alta frecuencia de
+# aparición, por lo cual se revisan sus asociaciones
+New_York <- findAssocs(dtm2_idf, "new york", .4)
+New_York
+write.table(New_York, "./New_York_assoc.csv", sep = "\t")
+
+Hong_Kong <- findAssocs(dtm2_idf, "hong kong", .4)
+Hong_Kong
+write.table(Hong_Kong, "./Hong_Kong_assoc.csv", sep = "\t")
+  
 ## Pierson's Correlations #### 
 # Se obtienen las correlaciones de Pearson para
 # todos los términos de la matriz ponderada con IDF
@@ -386,6 +396,8 @@ E(distance)$width <- egam
 plot(distance, layout=layout1, vertex.label.color="darkred")
 
 ## Dendrogram clustering ####
+# No dendrogram is generated for unigrams since it
+# offers the same information as the wordcloud
 m2 <- head(frecuencias2_idf, 2*numNodes)
 m3 <- t(removeSparseTerms(dtm2_idf, sparse = .79))
 
