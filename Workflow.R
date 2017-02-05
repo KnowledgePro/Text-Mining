@@ -289,8 +289,9 @@ TrigramTokenizer <-
  write.table(frecuencias4_idf, "./tetragramas_idf.csv", sep = "\t")
 
 ##Plot####
+# plot of "crude" matrix
 x<-1:length(frecuencias)
-qplot(x,frecuencias, log="xy", main = "Logarithmic term frequency",xlab = "Word's Statistical Rank", ylab = "Frequency")
+qplot(x,frecuencias, log="xy", main = "Logarithmic term frequency",xlab = "Word's Statistical Rank", ylab = "Frequency") 
 
 x2<-1:length(frecuencias2)
 qplot(x2,frecuencias2, log="xy", main = "Logarithmic bigram frequency",xlab = "Bigram's Statistical Rank", ylab = "Frequency")
@@ -389,11 +390,11 @@ set.seed(100)
 layout1 <- layout.fruchterman.reingold(distance)
 layout2 <- layout.kamada.kawai(distance)
 # Se da peso a cada nodo de acuerdo con sus conexiones:
-V(distance)$label.cex <- .7 * V(distance)$degree / max(V(distance)$degree)+ .5
+V(distance)$label.cex <- .8 * V(distance)$degree / max(V(distance)$degree)+ .5
 egam <- (log(E(distance)$weight)+.4)/ max(E(distance)$weight)+.4
 E(g)$color <- rgb(.5,.5, 0, egam)
 E(distance)$width <- egam
-plot(distance, layout=layout1, vertex.label.color="darkred")
+plot(distance, layout=layout1, vertex.color = 0.18*V(distance)$degree, vertex.label.color="black")
 
 ## Dendrogram clustering ####
 # No dendrogram is generated for unigrams since it
