@@ -18,7 +18,7 @@ inspect(articulos)
 # teniendo en cuenta forzar el tipo de dato a texto mediante 'as.character':
 writeLines(as.character(articulos[43]))
 writeLines(as.character(articulos[1]))
-writeLines(as.character(articulos[13]))
+writeLines(as.character(articulos[68]))
 # Hasta este momento se mantiene el contenido original. Se inicia el proceso de
 # transformación de los textos para obtener un material cuantificable. El paquete {tm}
 # incluye varias transformaciones:
@@ -183,9 +183,7 @@ write.table(frecuencias_idf, "./unigram_idf.csv", sep="\t")
 
 ##Bigramas#########
 # Se hace la tokenización por bigramas usando la capacidad del paquete {NLP}
-BigramTokenizer <-
-  function(x)
-    {
+BigramTokenizer <- function(x)    {
       unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = TRUE)
   }
 
@@ -227,9 +225,7 @@ write.table(frecuencias2_idf, "./bigramas_idf.csv", sep = "\t")
 
 ## Trigramas ######
 # Tokenización por trigramas usando la capacidad del paquete {NLP}
-TrigramTokenizer <-
-  function(x)
-  {
+TrigramTokenizer <-  function(x)  {
     unlist(lapply(ngrams(words(x), 3), paste, collapse = " "), use.names = TRUE)
   }
     
@@ -259,9 +255,7 @@ TrigramTokenizer <-
  
  ## Cuatrigramas ######
  # Tokenización por cuatrigramas usando la capacidad del paquete {NLP}
- FourgramTokenizer <-
-   function(x)
-   {
+ FourgramTokenizer <-   function(x)   {
      unlist(lapply(ngrams(words(x), 4), paste, collapse = " "), use.names = TRUE)
    }
  
@@ -286,6 +280,7 @@ TrigramTokenizer <-
  dtm4_idf <-removeSparseTerms(dtm4_idf,.9)
  inspect(dtm4_idf)
  frecuencias4_idf <- sort(colSums(as.matrix(dtm4_idf)), decreasing = T)
+ frecuencias4_idf 
  write.table(frecuencias4_idf, "./tetragramas_idf.csv", sep = "\t")
 
 ##Plot####
@@ -306,7 +301,9 @@ qplot(x_idf,frecuencias_idf, main = "Term frequency",xlab = "Word's Statistical 
 
 # WordCloud ####
 require(wordcloud)
-wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, ordered.colors = TRUE)
+# En blanco y negro
+wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, random.order = F)
+# En color
 wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = F)
 # wordcloud(names(frecuencias_idf),frecuencias_idf, max.words = 100, colors = brewer.pal(8, "Set2"), random.order = F)
 
@@ -333,10 +330,11 @@ squ_score
 # derivados de 'squander' se hace evidente que ninguna de estas palabras está
 # presente en el corpus. Se procede a eliminar el Corpus y la matriz Documento-Término sin ponderar:
 rm(articulos, dtm_articulos)
+rm(squ_score)
 # buscamos las asociaciones de 'squ':
 squ <- findAssocs(dtm_idf,"squ",.4)
 squ
-
+rm(squ)
 
 # Se revisa la asociación de los bigramas más frecuentes con otros bigramas
 # Primer bigrama:
@@ -394,7 +392,9 @@ V(distance)$label.cex <- .8 * V(distance)$degree / max(V(distance)$degree)+ .5
 egam <- (log(E(distance)$weight)+.4)/ max(E(distance)$weight)+.4
 E(g)$color <- rgb(.5,.5, 0, egam)
 E(distance)$width <- egam
-plot(distance, layout=layout1, vertex.color = 0.18*V(distance)$degree, vertex.label.color="black")
+plot(distance, layout=layout1, vertex.color = rgb(.5,.5, 0, 0.05*V(distance)$degree), vertex.label.color="black")
+
+
 
 ## Dendrogram clustering ####
 # No dendrogram is generated for unigrams since it
@@ -421,8 +421,12 @@ rect.hclust(fit3, k = 8)
 ## instalar en el sistema operativo la librería GNU Scientific Library (GSL) --
 ## development package. Sin eso, no corre la instalación.
 library(topicmodels)
+require(LDAvis)
 
-## LDA parameters ###########################################
-#
 
+
+# El parámetro k se obtiene por congruencia con la codificación manual.
+# En este caso el valor es 8.
+k <- 8
+lda <- LDA(dtm,k)
 
